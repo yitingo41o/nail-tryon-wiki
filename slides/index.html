@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 怎麼讓你在手機上試戴穿戴甲？— 教學簡報</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f1ec; --card:#fffaf6; --ink:#2b2120; --ink2:#5d4f4c; --ink3:#958581;
+  --line:#e6d8d0; --wine:#8c1c2b; --wine-bg:#f6e3e3; --blush:#f1d9d1;
+  --sage:#4f6b5a; --sage-bg:#e5ede7; --amber:#a5651a; --amber-bg:#f8ecd9;
+  --serif:"Noto Serif TC","Songti TC",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#2b2120;overflow:hidden;font-family:var(--sans);color:var(--ink)}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;position:relative;background:var(--bg);transform-origin:center center;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
+.slide{position:absolute;inset:0;padding:56px 72px 64px;display:none;flex-direction:column}
+.slide.active{display:flex;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kicker{font-size:15px;letter-spacing:.12em;color:var(--wine);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-size:54px;line-height:1.25;font-weight:700}
+h2{font-family:var(--serif);font-size:38px;line-height:1.3;margin-bottom:22px}
+h3{font-size:21px;margin-bottom:8px}
+p,li{font-size:20px;line-height:1.65;color:var(--ink2)}
+ul{padding-left:1.2em}
+li+li{margin-top:6px}
+b,strong{color:var(--ink)}
+.lead{font-size:23px;line-height:1.7;color:var(--ink2)}
+.row{display:flex;gap:28px;flex:1;min-height:0}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+.card p,.card li{font-size:18px}
+.big-num{font-family:var(--serif);font-size:40px;color:var(--wine);line-height:1.1}
+.num-label{font-size:15px;color:var(--ink3)}
+.tag{display:inline-block;font-size:14px;padding:3px 10px;border-radius:99px;background:var(--wine-bg);color:var(--wine);font-weight:700;margin-right:6px}
+.tag.sage{background:var(--sage-bg);color:var(--sage)}
+.tag.amber{background:var(--amber-bg);color:var(--amber)}
+.infer{display:inline-block;font-size:13px;padding:2px 9px;border-radius:6px;border:1.5px dashed var(--amber);color:var(--amber);font-weight:700;vertical-align:middle;margin-left:6px}
+.note{font-size:15px;color:var(--ink3)}
+.photo{border-radius:12px;object-fit:cover;width:100%;height:100%;display:block}
+.photo-wrap{position:relative;border-radius:12px;overflow:hidden;background:#eee}
+.src-bar{position:absolute;left:72px;right:72px;bottom:20px;font-size:13px;color:var(--ink3);display:flex;gap:6px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);padding-top:8px}
+.src-bar a{color:var(--ink2);text-decoration:none;border-bottom:1px dotted var(--ink3)}
+.src-bar a:hover{color:var(--wine)}
+a.wl{color:var(--wine);text-decoration:none;border-bottom:1px solid #e3b9bd}
+/* flow diagrams */
+.flow{display:flex;align-items:center;gap:10px}
+.step{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:17px;text-align:center;line-height:1.45;flex:1}
+.step small{display:block;font-size:13px;color:var(--ink3)}
+.arrow{color:var(--ink3);font-size:22px;flex:none}
+.lane{border-radius:16px;padding:18px 20px}
+.lane.a{background:var(--sage-bg)}
+.lane.b{background:var(--wine-bg)}
+.lane h3{margin-bottom:12px}
+table.cmp{width:100%;border-collapse:collapse;font-size:17px}
+table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;line-height:1.5}
+table.cmp th{font-size:15px;color:var(--ink3);font-weight:500}
+table.cmp td:first-child{font-weight:700;white-space:nowrap;color:var(--ink)}
+table.cmp td{color:var(--ink2)}
+/* cover */
+.cover{display:flex;gap:48px;align-items:center;height:100%}
+.cover .text{flex:1.3}
+.cover .img{flex:1;height:560px}
+/* nail demo */
+.demo{display:flex;gap:30px;flex:1;align-items:center}
+.demo-stage{width:360px;height:440px;background:radial-gradient(circle at 50% 40%,#fff,#efe3dc);border-radius:18px;position:relative;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);flex:none}
+.finger{width:150px;height:340px;border-radius:75px 75px 36px 36px;background:linear-gradient(90deg,#d9a68d,#ecc4ae 40%,#e9bea7 60%,#d29d84);position:relative;transform:rotate(var(--ang,0deg));transition:transform .4s}
+.free-edge{position:absolute;left:31px;top:14px;width:88px;height:30px;border-radius:44px 44px 6px 6px;background:#f6ece4;box-shadow:inset 0 -2px 3px rgba(0,0,0,.08)}
+.nail{position:absolute;left:27px;top:34px;width:96px;height:124px;border-radius:48px 48px 38px 38px/58px 58px 30px 30px;overflow:hidden;transition:all .4s;
+  background:
+    radial-gradient(circle at 34% 66%,#c3142f 0 10px,transparent 11px),
+    radial-gradient(circle at 62% 72%,#c3142f 0 10px,transparent 11px),
+    linear-gradient(160deg,transparent 47%,#6a4a2a 48% 50%,transparent 51%) 0 0/100% 100%,
+    linear-gradient(to bottom,#fff 0 22%,#efd2c6 22%)}
+.nail::before,.nail::after{content:"";position:absolute;inset:0;opacity:0;transition:opacity .4s}
+.nail::before{box-shadow:inset 14px 0 16px -6px rgba(70,30,20,.35),inset -14px 0 16px -6px rgba(70,30,20,.35)}
+.nail::after{background:linear-gradient(100deg,transparent 28%,rgba(255,255,255,.85) 40%,rgba(255,255,255,.15) 50%,transparent 58%)}
+.finger:not(.dir) .nail{transform:rotate(calc(-1 * var(--ang,0deg)))}
+.finger.shade .nail::before{opacity:1}
+.finger.spec .nail::after{opacity:1}
+.finger.extend .nail{top:10px;height:148px}
+.controls{display:flex;flex-direction:column;gap:12px;flex:1}
+.toggle{display:flex;align-items:flex-start;gap:12px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;cursor:pointer;user-select:none}
+.toggle input{width:20px;height:20px;margin-top:4px;accent-color:var(--wine);flex:none}
+.toggle b{font-size:18px}
+.toggle span{display:block;font-size:15px;color:var(--ink3);line-height:1.5}
+.toggle.on{border-color:var(--wine)}
+.range{display:flex;align-items:center;gap:12px;font-size:16px;color:var(--ink2)}
+.range input{flex:1;accent-color:var(--wine)}
+/* noise strip */
+.noise-strip{display:flex;gap:12px}
+.noise-strip figure{flex:1;text-align:center}
+.noise-strip .photo-wrap{height:210px}
+.noise-strip figcaption{font-size:14px;color:var(--ink3);margin-top:6px}
+.noise{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px 200px}
+/* mask */
+.mask{position:absolute;border:3px dashed var(--wine);border-radius:40% 40% 30% 30%;background:repeating-linear-gradient(45deg,rgba(140,28,43,.75) 0 8px,rgba(140,28,43,.45) 8px 16px)}
+.mask-label{position:absolute;background:var(--wine);color:#fff;font-size:14px;padding:3px 9px;border-radius:6px;font-weight:700}
+/* boxes for architecture */
+.arch{display:grid;gap:12px}
+.box{border-radius:12px;padding:12px 16px;font-size:17px;line-height:1.5;border:1.5px solid var(--line);background:var(--card)}
+.box.lock{background:#ece6e3;border-color:#cfc3be}
+.box.train{background:var(--wine-bg);border-color:#e3b9bd}
+.box.zero{background:var(--amber-bg);border-color:#e9cfa6;text-align:center}
+.box.inp{background:var(--sage-bg);border-color:#c4d6c9}
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:14px}
+.q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 20px}
+.q p{font-size:19px;color:var(--ink);font-weight:500;margin-bottom:8px}
+.opts{display:flex;gap:10px;flex-wrap:wrap}
+.opts button{font:inherit;font-size:16px;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}
+.opts button.right{border-color:var(--sage);background:var(--sage-bg);color:var(--sage);font-weight:700}
+.opts button.wrong{border-color:var(--wine);background:var(--wine-bg);color:var(--wine)}
+.explain{font-size:15px;color:var(--ink2);margin-top:8px;display:none}
+.q.done .explain{display:block}
+/* chrome */
+#nav{position:fixed;bottom:14px;right:18px;display:flex;gap:8px;align-items:center;z-index:5}
+#nav button{width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,.14);color:#fff;font-size:18px;cursor:pointer}
+#nav button:hover{background:rgba(255,255,255,.28)}
+#counter{color:rgba(255,255,255,.75);font-size:14px;min-width:56px;text-align:center}
+#progress{position:absolute;left:0;bottom:0;height:4px;background:var(--wine);transition:width .3s}
+.works{display:flex;gap:22px;flex:1;min-height:0}
+.work{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0}
+.work .photo-wrap{height:250px}
+.work .photo{object-position:center 30%}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- 1 封面 -->
+<section class="slide" data-wiki="wiki/index.md">
+  <div class="cover">
+    <div class="text">
+      <div class="kicker">生成式 AI ・ 教學簡報</div>
+      <h1>AI 怎麼讓你<br>在手機上試戴<br>穿戴甲？</h1>
+      <p class="lead" style="margin-top:22px">「直接貼圖」和「Diffusion 生成」差在哪？<br>指甲的弧度和光影又是怎麼做出來的？</p>
+      <p class="note" style="margin-top:28px">內容全部來自我的 LLM Wiki（6 篇資料）・ 照片為我的手工穿戴甲作品<br>← → 鍵或下方按鈕換頁</p>
+    </div>
+    <div class="img photo-wrap"><img class="photo" src="img/cherry.jpg" alt="櫻桃與愛心款手工穿戴甲作品照"></div>
+  </div>
+</section>
+
+<!-- 2 問題與學習目標 -->
+<section class="slide" data-wiki="wiki/index.md,wiki/discussion.md">
+  <div class="kicker">今天要回答的問題</div>
+  <h2>客人看到這組指甲，想知道「戴在我手上會是什麼樣子」</h2>
+  <div class="row">
+    <div class="col" style="flex:1.4">
+      <div class="card" style="background:var(--wine-bg);border-color:#e3b9bd">
+        <h3>核心問題</h3>
+        <p>把指甲圖<strong>直接貼到手上</strong>，和用 <strong>Diffusion 模型重新畫</strong>，效果差在哪？兩種方法各自怎麼處理指甲的<strong>曲面</strong>和<strong>光影</strong>？</p>
+      </div>
+      <div class="card">
+        <h3>看完這份簡報，你會知道</h3>
+        <ul>
+          <li>試戴為什麼比想像中難</li>
+          <li>「AR 貼圖路線」的三個步驟</li>
+          <li>「生成式路線」用到的三個工具：Inpainting、ControlNet、IP-Adapter</li>
+          <li>兩條路線各適合什麼情境</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="photo-wrap" style="flex:1"><img class="photo" src="img/bows-pearls.jpg" alt="蝴蝶結珍珠款手工穿戴甲作品照"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 為什麼難 -->
+<section class="slide" data-wiki="wiki/concepts/curvature-and-lighting.md,wiki/concepts/nail-segmentation.md">
+  <div class="kicker">先想想</div>
+  <h2>為什麼「試戴指甲」比想像中難？</h2>
+  <div class="row">
+    <div class="col" style="flex:1.5">
+      <div class="row" style="flex:none;gap:14px">
+        <div class="card" style="flex:1"><h3>① 指甲很小</h3><p>在整張照片裡只佔一點點，模型要很精細，又要輕到能在手機上跑。</p></div>
+        <div class="card" style="flex:1"><h3>② 手會動</h3><p>手指會轉、會彎，每片指甲的方向都不一樣。</p></div>
+      </div>
+      <div class="row" style="flex:none;gap:14px">
+        <div class="card" style="flex:1"><h3>③ 指甲有弧度</h3><p>指甲是曲面，不是一張平的貼紙；圖案在邊緣會「轉過去」。</p></div>
+        <div class="card" style="flex:1"><h3>④ 指甲會反光</h3><p>凝膠表面有亮亮的鏡面反光，位置會跟著光線和角度改變。</p></div>
+      </div>
+      <p class="note">右圖：看看指甲上的白色條狀高光和珍珠光澤。這些光影如果做不出來，試戴看起來就像「貼紙」。</p>
+    </div>
+    <div class="col"><div class="photo-wrap" style="flex:1"><img class="photo" src="img/pearl-shimmer.jpg" alt="珍珠光澤款手工穿戴甲，表面可見高光" style="object-position:center 25%"></div></div>
+  </div>
+</section>
+
+<!-- 4 兩條路線 -->
+<section class="slide" data-wiki="wiki/concepts/2d-overlay-tryon.md,wiki/concepts/diffusion-tryon.md">
+  <div class="kicker">全貌</div>
+  <h2>兩條路線</h2>
+  <div class="col" style="gap:22px">
+    <div class="lane a">
+      <h3><span class="tag sage">路線一</span>AR 貼圖：找到位置，把款式貼上去</h3>
+      <div class="flow">
+        <div class="step">① 找到手<small>手部關鍵點</small></div><div class="arrow">→</div>
+        <div class="step">② 找到每片指甲<small>指甲分割 + 方向</small></div><div class="arrow">→</div>
+        <div class="step">③ 貼上款式<small>+ 用漸層畫假反光</small></div>
+      </div>
+    </div>
+    <div class="lane b">
+      <h3><span class="tag">路線二</span>Diffusion 生成：把指甲遮住，請 AI 重畫</h3>
+      <div class="flow">
+        <div class="step">① 遮住指甲<small>Inpainting 遮罩</small></div><div class="arrow">+</div>
+        <div class="step">② 告訴它形狀<small>ControlNet</small></div><div class="arrow">+</div>
+        <div class="step">③ 告訴它款式<small>IP-Adapter（作品照）</small></div><div class="arrow">→</div>
+        <div class="step">④ 重畫<small>光影由模型生成</small></div>
+      </div>
+    </div>
+    <p class="lead">一句話：<strong>路線一</strong>保證款式正確，光影是「假」的；<strong>路線二</strong>光影比較「真」，但款式可能被改掉。</p>
+  </div>
+</section>
+
+<!-- 5 找到手 -->
+<section class="slide" data-wiki="wiki/concepts/hand-landmarks.md,wiki/sources/2020-mediapipe-hands.md">
+  <div class="kicker">路線一 ・ 步驟 ①</div>
+  <h2>找到手：MediaPipe Hands</h2>
+  <div class="row">
+    <div class="col" style="flex:1.3">
+      <div class="flow">
+        <div class="step">整張照片</div><div class="arrow">→</div>
+        <div class="step"><b>手掌偵測器</b><small>先框出手掌</small></div><div class="arrow">→</div>
+        <div class="step"><b>關鍵點模型</b><small>在框裡找 21 個點</small></div>
+      </div>
+      <div class="card">
+        <h3>為什麼先找「手掌」而不是整隻手？</h3>
+        <p>手掌形狀固定，比會彎曲的整隻手好框；手掌也比較小，兩隻手疊在一起時比較不會搞混。</p>
+      </div>
+      <div class="card">
+        <h3>每個關鍵點 = x、y + 相對深度（2.5D）</h3>
+        <p>知道每根手指朝哪裡、哪根比較靠近鏡頭 → 貼圖要轉幾度。</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center"><div class="big-num">21</div><div class="num-label">個手部關鍵點</div></div>
+      <div class="card" style="text-align:center"><div class="big-num">約 5.3 ms</div><div class="num-label">Full 版在 iPhone 11 上跑一次</div></div>
+      <div class="card" style="background:var(--amber-bg);border-color:#e9cfa6"><p><b>但它沒有告訴我們：</b>指甲的輪廓在哪，也沒有指甲表面的弧度。→ 需要下一步。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 找到指甲 -->
+<section class="slide" data-wiki="wiki/concepts/nail-segmentation.md,wiki/sources/2019-nail-polish-tryon.md">
+  <div class="kicker">路線一 ・ 步驟 ②</div>
+  <h2>找到每片指甲：ModiFace 的 Nail Polish Try-On</h2>
+  <div class="row">
+    <div class="col" style="flex:1.4">
+      <div class="card">
+        <h3>模型一次輸出三樣東西</h3>
+        <ul>
+          <li><b>是不是指甲</b>（每個像素）</li>
+          <li><b>是哪一根手指的指甲</b></li>
+          <li><b>方向</b>：每個像素都記錄「指甲根部 → 指尖」往哪</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>兩個小技巧</h3>
+        <ul>
+          <li>指甲只佔畫面一小部分 → 只對<b>最難的 10% 像素</b>算錯誤，模型就不會偷懶只猜背景。</li>
+          <li>用<b>連通元件</b>把結果切成一片一片的指甲，再算每片的角度。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center"><div class="big-num">94.5</div><div class="num-label">mIoU（分割準確度，越高越好）</div></div>
+      <div class="card" style="text-align:center"><div class="big-num">29.8 ms</div><div class="num-label">iPad Pro 上每一幀 → 可以即時</div></div>
+      <div class="card" style="text-align:center"><div class="big-num">1,438</div><div class="num-label">張自己收集、標註的照片</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 互動 demo -->
+<section class="slide" data-wiki="wiki/concepts/2d-overlay-tryon.md,wiki/sources/2019-nail-polish-tryon.md">
+  <div class="kicker">路線一 ・ 步驟 ③ ・ 動手試試</div>
+  <h2>把款式貼上去，再用「假光影」騙過眼睛</h2>
+  <div class="demo">
+    <div class="demo-stage"><div class="finger" id="finger"><div class="free-edge"></div><div class="nail"></div></div></div>
+    <div class="controls">
+      <div class="range">手指角度<input type="range" id="ang" min="-35" max="35" value="20"><span id="angv">20°</span></div>
+      <label class="toggle"><input type="checkbox" data-c="dir"><div><b>① 跟著方向轉</b><span>用模型預測的「根部 → 指尖」方向，把貼圖轉到和指甲一致。</span></div></label>
+      <label class="toggle"><input type="checkbox" data-c="spec"><div><b>② 加漸層反光</b><span>論文的做法：用漸層「模擬」鏡面反光，不是真的計算光線。</span></div></label>
+      <label class="toggle"><input type="checkbox" data-c="extend"><div><b>③ 把遮罩往指尖拉長</b><span>蓋住真實指甲尖端那段顏色較淺的部分。</span></div></label>
+      <label class="toggle"><input type="checkbox" data-c="shade"><div><b>④ 邊緣加暗</b><span class="infer" style="display:inline-block">示範用・非論文做法</span><span>讓平面看起來有一點弧度。論文本身沒有建立指甲的 3D 形狀。</span></div></label>
+    </div>
+  </div>
+</section>
+
+<!-- 8 diffusion 入門 -->
+<section class="slide" data-wiki="wiki/concepts/diffusion-inpainting.md,wiki/sources/2021-latent-diffusion.md">
+  <div class="kicker">路線二 ・ 先認識主角</div>
+  <h2>Diffusion：從一團雜訊，一步一步「擦」出圖片</h2>
+  <div class="noise-strip">
+    <figure><div class="photo-wrap"><img class="photo" src="img/stars.jpg" alt=""><div class="noise" style="opacity:1"></div></div><figcaption>一開始：純雜訊</figcaption></figure>
+    <figure><div class="photo-wrap"><img class="photo" src="img/stars.jpg" alt=""><div class="noise" style="opacity:.8"></div></div><figcaption>去一點雜訊</figcaption></figure>
+    <figure><div class="photo-wrap"><img class="photo" src="img/stars.jpg" alt=""><div class="noise" style="opacity:.55"></div></div><figcaption>輪廓出現</figcaption></figure>
+    <figure><div class="photo-wrap"><img class="photo" src="img/stars.jpg" alt=""><div class="noise" style="opacity:.28"></div></div><figcaption>細節出現</figcaption></figure>
+    <figure><div class="photo-wrap"><img class="photo" src="img/stars.jpg" alt=""></div><figcaption>完成</figcaption></figure>
+  </div>
+  <p class="note" style="margin-top:6px">↑ 示意圖（用加雜訊的方式模擬），不是模型真正的輸出。</p>
+  <div class="row" style="margin-top:14px;flex:none">
+    <div class="card" style="flex:1"><h3>Latent Diffusion 的關鍵想法</h3><p>先把圖片<b>壓縮成小的「潛在表示」</b>，在小空間裡做 diffusion，再還原成圖片。比直接在像素上做便宜很多 —— Stable Diffusion 就是這樣來的。</p></div>
+    <div class="card" style="flex:1"><h3>壓縮多少才好？</h3><p>壓太少訓練很慢，壓太多細節會不見。論文發現縮小 <b>4 倍或 8 倍</b>最剛好。</p></div>
+  </div>
+</section>
+
+<!-- 9 inpainting -->
+<section class="slide" data-wiki="wiki/concepts/diffusion-inpainting.md,wiki/sources/2021-latent-diffusion.md">
+  <div class="kicker">路線二 ・ 工具 ①</div>
+  <h2>Inpainting：只重畫遮住的地方</h2>
+  <div class="row">
+    <div class="col" style="flex:none;width:360px">
+      <div class="photo-wrap" style="aspect-ratio:3/4;flex:none">
+        <img class="photo" src="img/cherry.jpg" alt="作品照，其中一片指甲被遮罩蓋住">
+        <div class="mask" style="left:33.5%;top:24.2%;width:13.6%;height:19.4%"></div>
+        <div class="mask-label" style="left:29%;top:45%">遮罩：這裡重畫</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>做法</h3><p>把要換款式的指甲遮起來，模型會<b>參考周圍的畫面</b>，把遮住的地方畫回去，其他地方保持原樣。</p></div>
+      <div class="card" style="background:var(--sage-bg);border-color:#c4d6c9"><h3>好處：光影跟著照片走</h3><p>光線方向、膚色、反光都從整張照片推出來，不用自己設計反光。</p></div>
+      <div class="row" style="flex:none;gap:14px">
+        <div class="card" style="flex:1;text-align:center"><div class="big-num">9.39</div><div class="num-label">LDM 的 FID（越低越好）<br>LaMa 約 12.0</div></div>
+        <div class="card" style="flex:1;text-align:center"><div class="big-num">68.1%</div><div class="num-label">兩兩比較時<br>使用者選 LDM</div></div>
+      </div>
+      <div class="card" style="background:var(--amber-bg);border-color:#e9cfa6"><p><b>代價：</b>要一步一步取樣，比較慢；而且需要「精細到像素」的任務，壓縮可能會吃掉細節 —— 指甲上的手繪圖案正是這種東西。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 ControlNet -->
+<section class="slide" data-wiki="wiki/concepts/conditional-control.md,wiki/sources/2023-controlnet.md">
+  <div class="kicker">路線二 ・ 工具 ②</div>
+  <h2>ControlNet：告訴 AI「形狀要長這樣」</h2>
+  <div class="row">
+    <div class="col">
+      <div class="arch">
+        <div class="box inp">輸入一張<b>結構圖</b>：邊緣、深度圖、<b>法向量圖</b>、姿勢、草稿……</div>
+        <div class="box train">🛠 <b>可訓練的副本</b>：學習怎麼看懂結構圖</div>
+        <div class="box zero">⓪ <b>零卷積</b>：一開始輸出全是 0，不會干擾原模型</div>
+        <div class="box lock">🔒 <b>原本的 Stable Diffusion</b>：鎖住不動，保留原本畫圖的能力</div>
+      </div>
+      <p class="note">只用 1k 張圖訓練也不會崩壞；多個結構圖可以疊加使用。</p>
+    </div>
+    <div class="col">
+      <div class="card" style="background:var(--wine-bg);border-color:#e3b9bd">
+        <h3>和「指甲曲面」的關係</h3>
+        <p><b>法向量圖</b>記錄的是「表面每一點朝哪個方向」，也就是曲面資訊。</p>
+        <p style="margin-top:8px">如果能估出指甲的法向量圖交給 ControlNet，生成的圖案就有機會順著弧度走。<span class="infer">推論</span></p>
+      </div>
+      <div class="card"><h3>要注意</h3><p>結構不一定被完全遵守；而且光影仍然是 Diffusion 自己畫的，ControlNet 只管形狀。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 IP-Adapter -->
+<section class="slide" data-wiki="wiki/concepts/image-prompt.md,wiki/sources/2023-ip-adapter.md">
+  <div class="kicker">路線二 ・ 工具 ③</div>
+  <h2>IP-Adapter：直接拿作品照當提示</h2>
+  <div class="row">
+    <div class="col" style="flex:none;width:300px"><div class="photo-wrap" style="flex:1"><img class="photo" src="img/lace.jpg" alt="蕾絲款手工穿戴甲作品照"></div><p class="note">這種款式很難用文字描述清楚</p></div>
+    <div class="col">
+      <div class="flow">
+        <div class="step">作品照</div><div class="arrow">→</div>
+        <div class="step">CLIP 圖片編碼器<small>把圖變成一串數字（特徵）</small></div><div class="arrow">→</div>
+        <div class="step">另外加的一組 cross-attention<small>模型「參考提示」的通道，和文字提示並存</small></div>
+      </div>
+      <div class="row" style="flex:none;gap:14px">
+        <div class="card" style="flex:1;text-align:center"><div class="big-num">22M</div><div class="num-label">可訓練參數<br>（SD unCLIP 是 870M）</div></div>
+        <div class="card" style="flex:1"><h3>強度 λ 可以調</h3><p>λ = 0：不看圖<br>λ = 1：完全照圖</p></div>
+      </div>
+      <div class="card" style="background:var(--amber-bg);border-color:#e9cfa6">
+        <h3>⚠ 最重要的限制</h3>
+        <p>它抓得到參考圖的<b>內容和風格</b>，但<b>無法穩定保留細節</b>。對手工穿戴甲來說，生成結果可能是「風格很像、但蕾絲紋路不一樣」的指甲。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 IDM-VTON -->
+<section class="slide" data-wiki="wiki/concepts/diffusion-tryon.md,wiki/sources/2024-idm-vton.md">
+  <div class="kicker">路線二 ・ 組起來長怎樣</div>
+  <h2>完整案例：IDM-VTON（衣服的虛擬試穿）</h2>
+  <div class="row">
+    <div class="col">
+      <div class="arch">
+        <div class="box inp"><b>TryonNet</b>：SDXL（較大版的 Stable Diffusion）的 Inpainting 模型。輸入遮罩、被遮住的人物照、姿勢圖（DensePose）。</div>
+        <div class="box train"><b>IP-Adapter</b>：抓衣服的「高階語意」（是什麼款式），送進 cross-attention。</div>
+        <div class="box zero" style="text-align:left"><b>GarmentNet</b>：另一個平行的 UNet，專門抓衣服的「低階細節」（圖案、文字），送進 self-attention。</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>給我們的啟示</h3><p>研究者也發現「只用 IP-Adapter，細節會跑掉」，所以<b>多加一整個網路</b>專門保留細節。</p></div>
+      <div class="card" style="background:var(--amber-bg);border-color:#e9cfa6"><h3>即使這樣還是有限制</h3><p>遮罩區域裡的人物細節（例如<b>刺青、痣</b>）很難保留。換成指甲：指甲周圍的皮膚細節也可能被改掉。</p></div>
+      <p class="note">小辭典：cross-attention ＝ 模型參考「外部提示」的通道；self-attention ＝ 畫面各部分「互相參考」的通道；UNet ＝ Diffusion 裡負責去雜訊的網路。</p>
+      <p class="note">註：IDM-VTON 做的是衣服，不是指甲；這裡當作「完整生成式試戴系統」的參考。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 比較表 -->
+<section class="slide" data-wiki="wiki/comparisons/overlay-vs-diffusion.md">
+  <div class="kicker">整理</div>
+  <h2>兩條路線比一比</h2>
+  <table class="cmp">
+    <tr><th></th><th>路線一：AR 貼圖</th><th>路線二：Diffusion 生成</th></tr>
+    <tr><td>款式還原</td><td>✅ 圖案直接貼上，不會被改 <span class="infer">推論</span></td><td>⚠ 可能「風格像、細節不同」</td></tr>
+    <tr><td>光影</td><td>⚠ 用漸層「模擬」鏡面反光</td><td>✅ 依整張照片的上下文重畫</td></tr>
+    <tr><td>曲面</td><td>⚠ 只有平面遮罩 + 方向</td><td>✅ 可用深度 / 法向量圖當條件</td></tr>
+    <tr><td>立體裝飾</td><td>❌ 只能當平面圖 <span class="infer">推論</span></td><td>⚠ 有機會畫出陰影，但形狀不保證 <span class="infer">推論</span></td></tr>
+    <tr><td>速度</td><td>✅ 即時（iPad Pro 每幀 29.8 ms）</td><td>❌ 多步取樣，慢</td></tr>
+    <tr><td>需要準備</td><td>指甲分割資料（ModiFace 標了 1,438 張）</td><td>預訓練大模型 + 遮罩、姿勢等條件</td></tr>
+    <tr><td>適合</td><td>手機鏡頭即時試戴 <span class="infer">推論</span></td><td>一張照片的高品質預覽、宣傳圖 <span class="infer">推論</span></td></tr>
+  </table>
+</section>
+
+<!-- 14 用作品來想 -->
+<section class="slide" data-wiki="wiki/concepts/curvature-and-lighting.md,wiki/comparisons/overlay-vs-diffusion.md">
+  <div class="kicker">應用 ・ 用我的作品來想 <span class="infer">推論</span></div>
+  <h2>不同款式，適合的路線不一樣</h2>
+  <div class="works">
+    <div class="work">
+      <div class="photo-wrap"><img class="photo" src="img/stars.jpg" alt="手繪星星款"></div>
+      <h3><span class="tag sage">AR 貼圖 OK</span>平面手繪</h3>
+      <p>星星是畫在表面的平面圖案，細節多。貼圖能完整保留，只要補上反光就很像。</p>
+    </div>
+    <div class="work">
+      <div class="photo-wrap"><img class="photo" src="img/pearl-shimmer.jpg" alt="珍珠光澤款"></div>
+      <h3><span class="tag">光影是重點</span>珍珠光澤</h3>
+      <p>漂亮的地方在光澤隨角度變化。漸層假反光很難做出這種質感，生成式路線比較有機會。</p>
+    </div>
+    <div class="work">
+      <div class="photo-wrap"><img class="photo" src="img/cherry.jpg" alt="立體櫻桃款"></div>
+      <h3><span class="tag amber">兩邊都難</span>立體櫻桃</h3>
+      <p>櫻桃是凸起的立體裝飾，有側面和陰影。貼圖做不出立體感；生成式可能畫出陰影，但形狀不保證。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 混合做法 -->
+<section class="slide" data-wiki="wiki/comparisons/overlay-vs-diffusion.md,wiki/concepts/curvature-and-lighting.md">
+  <div class="kicker">我的想法 <span class="infer">推論・沒有任何一篇資料實驗過</span></div>
+  <h2>不一定要二選一：混合做法</h2>
+  <div class="row">
+    <div class="col" style="flex:1.3">
+      <div class="flow">
+        <div class="step" style="background:var(--sage-bg)"><b>① 先貼圖</b><small>把我的款式準確放到指甲上<br>→ 細節一定是對的</small></div>
+        <div class="arrow">→</div>
+        <div class="step" style="background:var(--wine-bg)"><b>② 再低強度生成</b><small>只在邊緣和反光區域重畫<br>→ 補上光影和曲面感</small></div>
+      </div>
+      <div class="card"><h3>為什麼這樣想</h3><p>路線一的強項（款式正確）剛好是路線二的弱點，路線二的強項（光影自然）剛好是路線一的弱點。</p></div>
+      <div class="card"><h3>這可以變成期末專案的實驗</h3><p>比較「純貼圖」、「純生成」、「混合」三種做法，看哪一種最像真的戴上去。</p></div>
+    </div>
+    <div class="col">
+      <div class="card" style="background:var(--amber-bg);border-color:#e9cfa6">
+        <h3>Wiki 目前的缺口</h3>
+        <p>6 篇資料都<b>沒有</b>「估計指甲 3D 形狀 / 法向量」的方法。</p>
+        <p style="margin-top:8px">ControlNet 能吃法向量圖，但法向量圖要從哪裡來？→ 下一輪要 ingest 的資料。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 小測驗 -->
+<section class="slide" data-wiki="wiki/concepts/hand-landmarks.md,wiki/concepts/image-prompt.md,wiki/concepts/2d-overlay-tryon.md">
+  <div class="kicker">小測驗 ・ 點選答案</div>
+  <h2>考考你</h2>
+  <div class="quiz">
+    <div class="q"><p>1. MediaPipe Hands 為什麼先偵測「手掌」，而不是整隻手？</p>
+      <div class="opts"><button data-ok="0">手掌顏色比較好認</button><button data-ok="1">手掌形狀固定、比較好框</button><button data-ok="0">手掌比較大</button></div>
+      <div class="explain">手掌是比較「硬」的物體，框起來比會彎曲的整隻手簡單；而且手掌比較小，兩隻手疊在一起時比較不會搞混。</div></div>
+    <div class="q"><p>2. 只用 IP-Adapter 生成試戴圖，最可能出現什麼問題？</p>
+      <div class="opts"><button data-ok="0">完全不像參考圖</button><button data-ok="1">風格像，但細節不一樣</button><button data-ok="0">只能用文字提示</button></div>
+      <div class="explain">IP-Adapter 抓得到內容和風格，但無法穩定保留細節。IDM-VTON 也是因此多加了 GarmentNet。</div></div>
+    <div class="q"><p>3. ModiFace 的 AR 試戴是怎麼做出指甲上的反光？</p>
+      <div class="opts"><button data-ok="0">用 3D 指甲模型計算光線</button><button data-ok="0">用 Diffusion 生成</button><button data-ok="1">用漸層模擬鏡面反光</button></div>
+      <div class="explain">論文用漸層來「近似」鏡面反光，沒有物理光照模型，也沒有 3D 指甲形狀。</div></div>
+  </div>
+</section>
+
+<!-- 17 回顧 -->
+<section class="slide" data-wiki="wiki/index.md">
+  <div class="kicker">重點回顧</div>
+  <h2>三句話記住今天的內容</h2>
+  <div class="row">
+    <div class="col" style="flex:1.4">
+      <div class="card"><p><b>1.</b> AR 貼圖 = 找手 → 找指甲 → 貼圖 + 假反光。<b>快、款式準</b>，但光影和曲面是近似的。</p></div>
+      <div class="card"><p><b>2.</b> Diffusion 生成 = Inpainting + ControlNet（形狀）+ IP-Adapter（款式）。<b>光影自然</b>，但<b>慢、細節可能跑掉</b>。</p></div>
+      <div class="card"><p><b>3.</b> 款式的特性決定路線：平面手繪適合貼圖，光澤質感需要生成，立體裝飾兩邊都還有挑戰。</p></div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h3>想看更多：我的 LLM Wiki</h3>
+        <ul style="font-size:16px">
+          <li><a class="wl" data-p="wiki/index.md">Wiki 目錄</a></li>
+          <li><a class="wl" data-p="wiki/comparisons/overlay-vs-diffusion.md">2D 貼圖 vs Diffusion 比較頁</a></li>
+          <li><a class="wl" data-p="wiki/glossary.md">名詞表</a></li>
+          <li><a class="wl" data-p="raw/sources.md">6 篇原始資料清單</a></li>
+        </ul>
+      </div>
+      <p class="note">每一張投影片下方都標了內容來自哪些 Wiki 頁，點了就能看到出處。</p>
+    </div>
+  </div>
+</section>
+
+<div id="progress"></div>
+</div></div>
+<div id="nav"><button id="prev" aria-label="上一頁">‹</button><span id="counter"></span><button id="next" aria-label="下一頁">›</button></div>
+
+<script>
+const REPO = "https://github.com/yitingo41o/nail-tryon-wiki/blob/main/";
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+
+// 每張投影片底部顯示 Wiki 來源（來自 data-wiki）
+slides.forEach((s, i) => {
+  const bar = document.createElement("div");
+  bar.className = "src-bar";
+  bar.innerHTML = "<span>Wiki 來源：</span>" + s.dataset.wiki.split(",").map(p =>
+    `<a href="${REPO}${p.trim()}" target="_blank" rel="noopener">${p.trim().replace(/^wiki\//, "")}</a>`).join("<span>・</span>");
+  s.appendChild(bar);
+});
+document.querySelectorAll("a.wl").forEach(a => { a.href = REPO + a.dataset.p; a.target = "_blank"; a.rel = "noopener"; });
+
+function show(n) {
+  cur = Math.max(0, Math.min(slides.length - 1, n));
+  slides.forEach((s, i) => s.classList.toggle("active", i === cur));
+  document.getElementById("counter").textContent = `${cur + 1} / ${slides.length}`;
+  document.getElementById("progress").style.width = `${(cur + 1) / slides.length * 100}%`;
+  history.replaceState(null, "", "#" + (cur + 1));
+}
+document.getElementById("prev").onclick = () => show(cur - 1);
+document.getElementById("next").onclick = () => show(cur + 1);
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  if (e.key === "Home") show(0);
+  if (e.key === "End") show(slides.length - 1);
+});
+let tx = null;
+document.addEventListener("touchstart", e => tx = e.touches[0].clientX, { passive: true });
+document.addEventListener("touchend", e => {
+  if (tx === null) return;
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1));
+  tx = null;
+});
+
+// 依視窗大小縮放 1280×720 的舞台
+function fit() {
+  const s = Math.min(innerWidth / 1280, innerHeight / 720);
+  document.getElementById("stage").style.transform = `scale(${s})`;
+}
+addEventListener("resize", fit); fit();
+
+// 互動示範：指甲貼圖
+const finger = document.getElementById("finger"), ang = document.getElementById("ang");
+function setAng() { finger.style.setProperty("--ang", ang.value + "deg"); document.getElementById("angv").textContent = ang.value + "°"; }
+ang.oninput = setAng; setAng();
+document.querySelectorAll(".toggle input").forEach(cb => cb.onchange = () => {
+  finger.classList.toggle(cb.dataset.c, cb.checked);
+  cb.closest(".toggle").classList.toggle("on", cb.checked);
+});
+
+// 小測驗
+document.querySelectorAll(".q").forEach(q => q.querySelectorAll("button").forEach(b => b.onclick = () => {
+  q.querySelectorAll("button").forEach(x => x.classList.remove("right", "wrong"));
+  b.classList.add(b.dataset.ok === "1" ? "right" : "wrong");
+  if (b.dataset.ok !== "1") q.querySelector('[data-ok="1"]').classList.add("right");
+  q.classList.add("done");
+}));
+
+show(parseInt(location.hash.slice(1)) - 1 || 0);
+</script>
+</body>
+</html>
